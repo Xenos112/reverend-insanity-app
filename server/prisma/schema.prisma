@@ -1,0 +1,16 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Chapter {
+  id           String   @unique @default(uuid())
+  number       Int
+  release_date DateTime
+  uri          String
+  language     String
+}
