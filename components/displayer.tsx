@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { useImage, Image } from 'expo-image';
 import { Dimensions } from 'react-native';
 
@@ -6,8 +7,12 @@ type DisplayerProps = {
 }
 
 const { width } = Dimensions.get('window');
-export default function Displayer({ uri }: DisplayerProps) {
-  const image = useImage(uri);
+function Displayer({ uri }: DisplayerProps) {
+  const image = useImage(uri, {
+    onError: (e) => {
+      console.log(e)
+    }
+  });
 
   const calculatedHeight = image?.width && image?.height
     ? (image.height / image.width) * width
@@ -17,7 +22,10 @@ export default function Displayer({ uri }: DisplayerProps) {
     <Image
       source={image}
       cachePolicy={'disk'}
+      priority='high'
       style={{ width: width, height: calculatedHeight }}
     />
   );
 }
+
+export default memo(Displayer);

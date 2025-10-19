@@ -11,6 +11,6 @@ model Chapter {
   id           String   @unique @default(uuid())
   number       Int
   release_date DateTime
-  uri          String
+  uri          String[]
   language     String
 }
