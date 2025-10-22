@@ -1,32 +1,47 @@
-import Displayer from '@/components/displayer';
-import { useEffect, useState } from 'react';
-import { View, FlatList } from 'react-native';
+import { Link } from 'expo-router';
+import { FlatList, StyleSheet, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors } from '@/styles/theme'
+import Header from '@/components/header';
+import { languages } from '@/constents'
 
 export default function IndexPage() {
-  const [chapter, setChapter] = useState<any>({})
-
-  useEffect(() => {
-    const fetcher = async () => {
-      const res = await fetch("http://10.18.229.244:3000/407a9c14-d636-4e13-844f-c43e646de208")
-        .then(res => res.json())
-      setChapter(res)
-    }
-
-    fetcher()
-  }, [])
-
-  return <View>
-    {chapter.uri ?
+  return (
+    <SafeAreaView style={styles.container}>
+      <Header />
       <FlatList
-        data={chapter.uri}
-        removeClippedSubviews={true}
-        windowSize={5}
-        maxToRenderPerBatch={10}
-        updateCellsBatchingPeriod={50}
-        initialNumToRender={10}
-        renderItem={({ item, index }) => <Displayer uri={item} key={index} />}
+        data={languages}
+        renderItem={({ item, index }) =>
+          <Link href={`/languages/${item.language}`} key={index} style={styles.languageContainer}>
+            <Text style={styles.languageFlag}>{item.flag}</Text>
+            <Text style={styles.languageText}>{item.language}</Text>
+          </Link>
+        }
       />
-      : null
-    }
-  </View>
+    </SafeAreaView>
+  )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  languageContainer: {
+    flexDirection: 'row',
+    gap: 16,
+    backgroundColor: colors.surface,
+    padding: 16,
+    marginTop: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  languageText: {
+    color: colors.text,
+    fontSize: 24,
+  },
+  languageFlag: {
+    fontSize: 32,
+  },
+})

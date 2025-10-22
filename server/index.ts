@@ -30,6 +30,11 @@ app.get('/feed/:language', async (req, res) => {
     orderBy: {
       release_date: 'desc',
     },
+    select: {
+      id: true,
+      number: true,
+      release_date: true
+    },
   })
 
   res.json(chapters)
