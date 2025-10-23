@@ -6,11 +6,12 @@ import {
   StyleSheet,
   Pressable,
   Text,
-  ViewToken
+  ViewToken,
+  Animated,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import useChapter from '@/hooks/useChapter';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar'
 import { colors } from '@/styles/theme';
 import { ChevronLeft } from 'lucide-react-native'
@@ -27,6 +28,36 @@ export default function ChapterPage() {
   const { data: chapter } = useChapter(chapterId)
   const scrollBeganRef = useRef<boolean>(false)
   const router = useRouter()
+  const totalPages: number = chapter?.uri?.length || 0
+  const progress: number = totalPages > 0 ? (currentPage / totalPages) * 100 : 0
+
+  // Animation values
+  const topBarAnimation = useRef(new Animated.Value(0)).current
+  const bottomBarAnimation = useRef(new Animated.Value(0)).current
+  const progressBarAnimation = useRef(new Animated.Value(0)).current
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(topBarAnimation, {
+        toValue: UIHidden ? 0 : 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(bottomBarAnimation, {
+        toValue: UIHidden ? 0 : 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start()
+  }, [UIHidden, bottomBarAnimation, topBarAnimation])
+
+  useEffect(() => {
+    Animated.timing(progressBarAnimation, {
+      toValue: progress,
+      duration: 200,
+      useNativeDriver: false,
+    }).start()
+  }, [progress, progressBarAnimation])
 
   const handlePress = () => {
     if (!scrollBeganRef.current) {
@@ -41,12 +72,23 @@ export default function ChapterPage() {
     }
   }).current
 
-  const viewabilityConfig = useRef({
-    itemVisiblePercentThreshold: 50
-  }).current
+  const topBarTranslateY = topBarAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-100, 0],
+  })
 
-  const totalPages: number = chapter?.uri?.length || 0
-  const progress: number = totalPages > 0 ? (currentPage / totalPages) * 100 : 0
+  const bottomBarTranslateY = bottomBarAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [100, 0],
+  })
+
+  const topBarOpacity = topBarAnimation
+  const bottomBarOpacity = bottomBarAnimation
+
+  const progressWidth = progressBarAnimation.interpolate({
+    inputRange: [0, 100],
+    outputRange: ['0%', '100%'],
+  })
 
   return (
     <View style={styles.container}>
@@ -64,7 +106,6 @@ export default function ChapterPage() {
           onScrollEndDrag={() => { scrollBeganRef.current = false }}
           onMomentumScrollEnd={() => { scrollBeganRef.current = false }}
           onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
           renderItem={({ item }: { item: string }) =>
             <Pressable style={{ flex: 1 }} onPress={handlePress}>
               <Displayer uri={item} />
@@ -75,7 +116,16 @@ export default function ChapterPage() {
       }
 
       {/* Top Title Bar */}
-      <View style={[styles.chapterTitleBar, UIHidden && styles.hidden]}>
+      <Animated.View
+        style={[
+          styles.chapterTitleBar,
+          {
+            transform: [{ translateY: topBarTranslateY }],
+            opacity: topBarOpacity,
+          }
+        ]}
+        pointerEvents={UIHidden ? 'none' : 'auto'}
+      >
         <Pressable
           onPress={() => router.push("../")}
           style={styles.backButton}
@@ -87,14 +137,28 @@ export default function ChapterPage() {
             Chapter {chapter?.number}
           </Text>
         </View>
-      </View>
+      </Animated.View>
 
       {/* Bottom Details Bar */}
-      <View style={[styles.chapterDetails, UIHidden && styles.hidden]}>
+      <Animated.View
+        style={[
+          styles.chapterDetails,
+          {
+            transform: [{ translateY: bottomBarTranslateY }],
+            opacity: bottomBarOpacity,
+          }
+        ]}
+        pointerEvents={UIHidden ? 'none' : 'auto'}
+      >
         {/* Progress Bar */}
         <View style={styles.progressBarContainer}>
           <View style={styles.progressBarBackground}>
-            <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
+            <Animated.View
+              style={[
+                styles.progressBarFill,
+                { width: progressWidth }
+              ]}
+            />
           </View>
         </View>
 
@@ -107,7 +171,7 @@ export default function ChapterPage() {
             {Math.round(progress)}%
           </Text>
         </View>
-      </View>
+      </Animated.View>
     </View>
   )
 }
@@ -116,9 +180,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-  },
-  hidden: {
-    display: 'none'
   },
 
   // Top Title Bar
