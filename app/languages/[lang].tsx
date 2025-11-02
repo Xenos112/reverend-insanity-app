@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, Link } from 'expo-router'
 import useLanguageChapters from "@/hooks/useLanguageChapters";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -10,16 +10,37 @@ export default function LanguagePage() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <FlatList
-        style={styles.chaptersList}
-        data={chapters}
-        removeClippedSubviews={true}
-        windowSize={5}
-        maxToRenderPerBatch={10}
-        updateCellsBatchingPeriod={50}
-        initialNumToRender={10}
-        renderItem={({ item, index }) => <Link href={`/chapters/${item.id}`} style={styles.chapter} key={index}>Chapter {item.number}</Link>}
-      />
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Text style={styles.title}>{lang}</Text>
+          <Text style={styles.subtitle}>{chapters?.length || 0} chapters available</Text>
+        </View>
+        <FlatList
+          style={styles.chaptersList}
+          data={chapters}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
+          removeClippedSubviews={true}
+          windowSize={5}
+          maxToRenderPerBatch={10}
+          updateCellsBatchingPeriod={50}
+          initialNumToRender={10}
+          renderItem={({ item, index }) =>
+            <Link href={`/chapters/${item.id}`} style={styles.chapterCard} key={index}>
+              <View style={styles.chapterInfo}>
+                <View style={styles.chapterNumber}>
+                  <Text style={styles.chapterNumberText}>{item.number}</Text>
+                </View>
+                <View style={styles.chapterTextContainer}>
+                  <Text style={styles.chapterTitle}>Chapter {item.number}</Text>
+                  <Text style={styles.chapterMeta}>{item.title || 'Untitled'}</Text>
+                </View>
+              </View>
+              <Text style={styles.arrow}>→</Text>
+            </Link>
+          }
+        />
+      </View>
     </SafeAreaView>
   )
 }
@@ -28,19 +49,81 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    padding: 16,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 24,
+  },
+  header: {
+    paddingVertical: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    marginBottom: 24,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: colors.text,
+    letterSpacing: -0.5,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#888',
   },
   chaptersList: {
+    flex: 1,
   },
-  chapter: {
-    color: colors.text,
-    fontSize: 24,
-    marginTop: 16,
-    marginHorizontal: 16,
-    padding: 16,
+  listContent: {
+    gap: 12,
+    paddingBottom: 24,
+  },
+  chapterCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.surface,
+    padding: 20,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: colors.primary,
-    backgroundColor: colors.surface,
-  }
+    borderColor: colors.border,
+  },
+  chapterInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    flex: 1,
+  },
+  chapterNumber: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#0a0a0a',
+    borderWidth: 1,
+    borderColor: '#222',
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chapterNumberText: {
+    color: '#888',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  chapterTextContainer: {
+    gap: 4,
+    flex: 1,
+  },
+  chapterTitle: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  chapterMeta: {
+    color: '#666',
+    fontSize: 13,
+  },
+  arrow: {
+    color: '#444',
+    fontSize: 18,
+  },
 })

@@ -28,7 +28,7 @@ app.get('/feed/:language', async (req, res) => {
       language: req.params.language,
     },
     orderBy: {
-      release_date: 'desc',
+      number: 'desc',
     },
     select: {
       id: true,
