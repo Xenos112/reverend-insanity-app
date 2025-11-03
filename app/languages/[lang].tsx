@@ -1,8 +1,9 @@
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, Link } from 'expo-router'
 import useLanguageChapters from "@/hooks/useLanguageChapters";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "@/styles/theme";
+import { FlashList } from '@shopify/flash-list'
 
 export default function LanguagePage() {
   const { lang } = useLocalSearchParams<{ lang: string }>()
@@ -15,16 +16,13 @@ export default function LanguagePage() {
           <Text style={styles.title}>{lang}</Text>
           <Text style={styles.subtitle}>{chapters?.length || 0} chapters available</Text>
         </View>
-        <FlatList
+        <FlashList
           style={styles.chaptersList}
           data={chapters}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
           removeClippedSubviews={true}
-          windowSize={5}
-          maxToRenderPerBatch={10}
-          updateCellsBatchingPeriod={50}
-          initialNumToRender={10}
+          overrideItemLayout={() => ({ width: '100%', height: 100 })}
           renderItem={({ item, index }) =>
             <Link href={`/chapters/${item.id}`} style={styles.chapterCard} key={index}>
               <View style={styles.chapterInfo}>
