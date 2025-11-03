@@ -13,4 +13,5 @@ model Chapter {
   release_date DateTime
   uri          String[]
   language     String
+  title        String?
 }

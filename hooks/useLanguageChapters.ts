@@ -6,6 +6,7 @@ type Chapter = {
   id: string,
   number: number
   release_date: Date
+  title?: string
 }
 
 export default function useLanguageChapters(lang: string) {

@@ -28,12 +28,13 @@ app.get('/feed/:language', async (req, res) => {
       language: req.params.language,
     },
     orderBy: {
-      number: 'desc',
+      number: 'asc',
     },
     select: {
       id: true,
       number: true,
-      release_date: true
+      release_date: true,
+      title: true
     },
   })
 
